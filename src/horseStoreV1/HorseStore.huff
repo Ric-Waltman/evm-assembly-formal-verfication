@@ -1,6 +1,11 @@
 // Horse Store
 // data flow: calldata -> function dispatch -> function
 
+// Interface
+#define function updateHorseNumber(uint256) nonpayable returns()
+#define function readNumberOfHorses() view returns(uint256)
+
+
 // 60008060093d393df3 -> Contract Creation Bytecode
 #define macro MAIN() = takes(0) returns(0) {
     0x00            // [0]
@@ -15,17 +20,17 @@
 
     // Jump to function data associated with fn_selector
     // updateHorseNumber(uint256) -> 0xcdfead2e
-    dup1            // [fn_selector, fn_selector]    
-    0xcdfead2e      // [0xcdfead2e, fn_selector, fn_selector]
-    eq              // [(0xcdfead2e == fn_selector), fn_selector]
-    updateJump      // [updateJump, (0xcdfead2e == fn_selector), fn_selector]
-    jumpi           // [fn_selector]
+    dup1                            // [fn_selector, fn_selector]    
+    __FUNC_SIG(updateHorseNumber)   // [func_sig(updateHorseNumber), fn_selector, fn_selector]
+    eq                              // [(func_sig(updateHorseNumber) == fn_selector), fn_selector]
+    updateJump                      // [updateJump, (func_sig(updateHorseNumber) == fn_selector), fn_selector]
+    jumpi                           // [fn_selector]
 
     // readNumberOfHorses() -> 0xe026c017
-    0xe026c017      // [0xe026c017, fn_selector]
-    eq              // [(0xe026c017 == fn_selector)]
-    readJump        // [readJump, (0xe026c017 == fn_selector)]
-    jumpi           // []
+    __FUNC_SIG(readNumberOfHorses)  // [func_sig(readNumberOfHorses), fn_selector]
+    eq                              // [(func_sig(readNumberOfHorses) == fn_selector)]
+    readJump                        // [readJump, (func_sig(readNumberOfHorses) == fn_selector)]
+    jumpi                           // []
 
     0x00 0x00 revert
 
