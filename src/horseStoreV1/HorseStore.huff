@@ -1,5 +1,4 @@
 // Horse Store
-// data flow: calldata -> function dispatch -> function
 
 // Interface
 #define function updateHorseNumber(uint256) nonpayable returns()
