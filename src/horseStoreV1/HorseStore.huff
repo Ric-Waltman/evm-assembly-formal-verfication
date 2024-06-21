@@ -50,4 +50,15 @@
     stop
 }
 
-#define macro GET_NUMBER_OF_HORSES() = takes(0) returns(0){}
+#define macro GET_NUMBER_OF_HORSES() = takes(0) returns(0){
+    // Get the storage slot
+    [NUMBER_OF_HORSES_STORAGE_SLOT] // [NUMBER_OF_HORSES_STORAGE_SLOT]
+    // Load the value of that slot into memory
+    sload                           // [sload[NUMBER_OF_HORSES_STORAGE_SLOT]]
+    0x00                            // [0x00, sload[NUMBER_OF_HORSES_STORAGE_SLOT]]
+    mstore                          // []
+    // Return
+    0x20                            // [0x20]
+    0x00                            // [0x00, 0x20]
+    return                          // []
+}
