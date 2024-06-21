@@ -27,11 +27,13 @@
     readJump        // [readJump, (0xe026c017 == fn_selector)]
     jumpi           // []
 
+    0x00 0x00 revert
+
     updateJump:
-        SET_NUMBER_OF_HORSES()// []
+        SET_NUMBER_OF_HORSES() // []
     readJump:
-        READ_NUMBER_OF_HORSES()// []
+        GET_NUMBER_OF_HORSES() // []
 }
 
 #define macro SET_NUMBER_OF_HORSES() = takes(0) returns(0){}
-#define macro READ_NUMBER_OF_HORSES() = takes(0) returns(0){}
+#define macro GET_NUMBER_OF_HORSES() = takes(0) returns(0){}
