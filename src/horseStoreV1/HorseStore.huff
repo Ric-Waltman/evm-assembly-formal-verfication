@@ -1,0 +1,15 @@
+// Horse Store
+// data flow: calldata -> function dispatch -> function
+
+// 60008060093d393df3 -> Contract Creation Bytecode
+#define macro MAIN() = takes(0) returns(0) {
+    0x00            // [0]
+
+    // calldataload loads 32 bytes
+    calldataload    // [data[0]]
+    
+    // how do we cut down calldataload to the fn selector of 4 bytes
+    // 32bytes - 4bytes = 28bytes * 8 = 224 dec == 0xe0
+    0xe0            // [0xe0, data[0]]
+    shr             // [fn_selector]
+}
