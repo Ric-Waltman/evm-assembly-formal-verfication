@@ -14,4 +14,9 @@ abstract contract Base_TestV1 is Test {
     function testReadValue() public view {
         assertEq(horseStore.readNumberOfHorses(), 0);
     }
+
+    function testWriteValue(uint256 numHorses) public {
+        horseStore.updateHorseNumber(numHorses);
+        assertEq(horseStore.readNumberOfHorses(), numHorses);
+    }
 }
