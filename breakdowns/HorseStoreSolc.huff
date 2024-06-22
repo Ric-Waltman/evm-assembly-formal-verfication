@@ -1,0 +1,185 @@
+// Creation Code
+// 0x6080604052348015600e575f80fd5b5060a58061001b5f395ff3
+
+// Runtime Code
+// fe6080604052348015600e575f80fd5b50600436106030575f3560e01c8063cdfead2e146034578063e026c017146045575b5f80fd5b6043603f3660046059565b5f55565b005b5f5460405190815260200160405180910390f35b5f602082840312156068575f80fd5b503591905056
+
+// Metadata
+// fea2646970667358221220f4cc721dc409b528475d0864e930edfca7075364564549d6a1e547f09bdb547a64736f6c63430008140033
+
+// 3 Sections for EVM Bytecode:
+//   1. Contract Creation
+//   2. Runtime
+//   3. Metadata
+
+// 1. Contract Creation
+// free memory pointer
+PUSH1 0x80          // [0x80]
+PUSH1 0x40          // [0x40, 0x80]
+MSTORE              // [], Memory: [0x40: 0x80]
+
+// what does this chunk do?
+// If someone sent eth value to this contract creation, revert
+// Otherwise, jump to PC/JUMPDEST
+CALLVALUE           // [msg.value]
+DUP1                // [msg.value, msg.value]
+ISZERO              // [0x00 == msg.value, msg.value]
+PUSH1 0x0e          // [0x0e, 0x00 == msg.value msg.value]
+JUMPI               // [msg.value]
+PUSH0               // [0x00, msg.value]
+DUP1                // [0x00, 0x00, msg.value]
+REVERT              // [0]
+
+// Jump dest if no eth value is sent
+// Sticks runtime code on-chain
+JUMPDEST            // [msg.value]
+POP                 // []
+PUSH1 0xa5          // [0xa5]
+DUP1                // [0xa5, 0xa5]
+PUSH2 0x001b        // [0x001b, 0xa5, 0xa5]
+PUSH0               // [0x00, 0x001b, 0xa5, 0xa5]
+CODECOPY            // [0xa5]
+PUSH0               // [0x00, 0xa5]
+RETURN              // []
+INVALID             // []
+
+// Runtime Code
+// Entry point of all calls
+// Free memory pointer
+PUSH1 0x80
+PUSH1 0x40
+MSTORE
+
+// Revert if any eth value is sent with the call
+CALLVALUE           // [msg.value]
+DUP1                // [msg.value, msg.value]
+ISZERO              // [0x00 == msg.value, msg.value]
+PUSH1 0x0e          // [0x0e, 0x00 == msg.value, msg.value]
+JUMPI               // [msg.value]
+PUSH0               // [0x00, msg.value]
+DUP1                // [0x00, 0x00, msg.value]
+REVERT              // []
+
+// This is checking to see if there is enough calldata for a function selector
+JUMPDEST            // [msg.value]
+POP                 // []
+PUSH1 0x04          // [0x04]
+CALLDATASIZE        // [calldatasize, 0x04]
+LT                  // [calldatasize < 0x04]
+PUSH1 0x30          // [0x30, calldatasize < 0x04]
+JUMPI               // []
+
+// Solidity's Function Dispatcher
+PUSH0               // [0x00]
+CALLDATALOAD        // [data(0)]
+PUSH1 0xe0          // [0xe0, data(0)]
+SHR                 // [fn_selector]
+DUP1                // [fn_selector, fn_selector]
+PUSH4 0xcdfead2e    // [0xcdfead2e, fn_selector, fn_selector]
+EQ                  // [0xcdfead2e == fn_selector, fn_selector]
+PUSH1 0x34          // [0x34, 0xcdfead2e == fn_selector, fn_selector]
+JUMPI               // [fn_selector]
+
+DUP1                // [fn_selector, fn_selector]
+PUSH4 0xe026c017    // [0xe026c017, fn_selector, fn_selector]
+EQ                  // [0xe026c017 == fn_selector, fn_selector]
+PUSH1 0x45          // [0x45, 0xe026c017 == fn_selector, fn_selector]
+JUMPI               // [fn_selector]
+
+// Revert jumpdest
+JUMPDEST            // []
+PUSH0               // [0x00]
+DUP1                // [0x00, 0x00]
+REVERT              // []
+
+// Update Horse Number: JUMPDEST #1
+JUMPDEST            // [fn_selector]
+PUSH1 0x43          // [0x43, fn_selector]
+PUSH1 0x3f          // [0x3f, 0x43, fn_selector]
+CALLDATASIZE        // [calldatasize, 0x3f, 0x43, fn_selector]
+PUSH1 0x04          // [0x04, calldatasize, 0x3f, 0x43, fn_selector]
+PUSH1 0x59          // [0x59, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+JUMP                // [0x04, calldatasize, 0x3f, 0x43, fn_selector]
+// jumps to updateHorseNumber
+
+// Update Horse Number: JUMPDEST #4
+// Store calldata(0x04) to storage slot 0
+JUMPDEST            // [data(0x04), 0x43, fn_selector]
+PUSH0               // [0x00, data(0x04), 0x43, fn_selector]
+SSTORE              // [0x43, fn_selector]
+JUMP                // [fn_selector]
+
+// Update Horse Number: JUMPDEST #5
+JUMPDEST            // [fn_selector]
+STOP                // [fn_selector]
+
+// Read Number Horses: JUMPDEST #1
+// Get free memory pointer, use it, and then update free memory pointer
+JUMPDEST            // [fn_selector]
+PUSH0               // [0, fn_selector]
+SLOAD               // [numHorses, fn_selector]
+PUSH1 0x40          // [0x40, numHorses, fn_selector]
+MLOAD               // [0x80, numHorses, fn_selector], free memory pointer loaded onto stack
+SWAP1               // [numHorses, 0x80, fn_selector]
+DUP2                // [0x80, numHorses, 0x80, fn_selector]
+MSTORE              // [0x80, fn_selector], Memory: [0x40: 0x80, 0x80: numHorses]
+PUSH1 0x20          // [0x20, 0x80, fn_selector]
+ADD                 // [0xa0, fn_selector]
+PUSH1 0x40          // [0x40, 0xa0, fn_selector]
+MLOAD               // [0x80, 0xa0, fn_selector]
+DUP1                // [0x80, 0x80, 0xa0, fn_selector]
+SWAP2               // [0xa0, 0x80, 0x80, fn_selector]
+SUB                 // [0x20, 0x80, fn_selector]
+SWAP1               // [0x80, 0x20, fn_selector]
+// Return memory location 0x80, with size 0x20 (32 bytes)
+RETURN              // [fn_selector]
+
+// Update Horse Number: JUMPDEST #2
+// Checks to see if there is a value to update the horseNumber to
+JUMPDEST            // [0x04, calldatasize, 0x3f, 0x43, fn_selector]
+PUSH0               // [0x00, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+PUSH1 0x20          // [0x20, 0x00, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+DUP3                // [0x04, 0x20, 0x00, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+DUP5                // [calldatasize, 0x04, 0x20, 0x00, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+SUB                 // [calldatasize - 0x04, 0x20, 0x00, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+SLT                 // [calldatasize - 0x04 < 0x20, 0x00, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+// is there more calldata than just the fn selector?
+ISZERO              // [true == calldatasize - 0x04 < 0x20, 0x00, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+PUSH1 0x68          // [0x68, more_calldata_than_fn_sel?, 0x00, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+JUMPI               // [0x00, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+// revert if there is not enough calldata to update the horse number
+PUSH0               // [0x00, 0x00, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+DUP1                // [0x00, 0x00, 0x00, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+REVERT              // [0x04, calldatasize, 0x3f, 0x43, fn_selector]
+
+// Update Horse Number: JUMPDEST #3
+JUMPDEST                // [0x00, 0x04, calldatasize, 0x3f, 0x43, fn_selector]
+POP                     // [0x04, calldatasize, 0x3f, 0x43, fn_selector]    
+CALLDATALOAD            // [data(0x04), calldatasize, 0x3f, 0x43, fn_selector]
+SWAP2                   // [0x3f, calldatasize, data(0x04), 0x43, fn_selector]
+SWAP1                   // [calldatasize, 0x3f, data(0x04), 0x43, fn_selector]
+POP                     // [0x3f, data(0x04), 0x43, fn_selector]
+JUMP                    // [data(0x04), 0x43, fn_selector]
+
+// 3. Metadata
+// Identifies which version, optimizations, compile options, etc
+// Etherscan will read this metadata to know these things
+INVALID
+LOG2
+PUSH5 0x6970667358
+INVALID
+SLT
+KECCAK256
+DELEGATECALL
+INVALID
+PUSH19 0x1dc409b528475d0864e930edfca70753645645
+BLOBHASH
+INVALID
+LOG1
+INVALID
+SELFBALANCE
+CREATE
+SWAP12
+INVALID
+SLOAD
+PUSH27 0x64736f6c63430008140033
