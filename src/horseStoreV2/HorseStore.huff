@@ -1,9 +1,27 @@
+// Import
+#include "../../lib/huffmate/src/data-structures/Hashmap.huff"
+
 // Interfaces
 #define function mintHorse() nonpayable returns()
 #define function feedHorse(uint256 horseId) nonpayable returns()
 #define function isHappyHorse(uint256 horseId) view returns (bool)
 #define function horseIdToFedTimeStamp(uint256 horseId) view returns (uint256 lastFedTimeStamp)
 #define function HORSE_HAPPY_IF_FED_WITHIN() view returns(uint256)
+
+// storage slot for the mapping
+#define constant HORSE_FED_TIMESTAMP_SLOT = FREE_STORAGE_POINTER()
+
+#define macro FEED_HORSE() = takes(0) returns(0) {
+    timestamp                       // [timestamp]
+    0x04                            // [0x04, timestamp]
+    calldataload                    // [data[0x04], timestamp]
+    
+    // sstore the timestamp with the horseId key
+    [HORSE_FED_TIMESTAMP_SLOT]      // [HORSE_FED_TIMESTAMP_SLOT, data[0x04], timestamp]
+    
+    // Pass in 0x00 as the free memory pointer, which we don't worry about for now in this course
+    STORE_ELEMENT_FROM_KEYS(0x00)   // []
+}
 
 #define macro MAIN() = takes(0) returns(0) {
     0x00 CALLDATALOAD 0xE0 SHR      // [fn_selector]
