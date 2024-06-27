@@ -69,6 +69,13 @@
     0x20 0x00 return            // [0x20 0x00 return]
 }
 
+#define macro HORSE_HAPPY_IF_FED_WITHIN() = takes(0) returns(0) {
+    [HORSE_HAPPY_IF_FED_WITHIN_CONST]// [HORSE_HAPPY_IF_FED_WITHIN_CONST]
+    0x00                             // [0x00, HORSE_HAPPY_IF_FED_WITHIN_CONST]
+    mstore                           // []
+    0x20 0x00 return
+}
+
 #define macro MAIN() = takes(0) returns(0) {
     0x00 CALLDATALOAD 0xE0 SHR      // [fn_selector]
 
