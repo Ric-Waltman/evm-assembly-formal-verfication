@@ -11,6 +11,22 @@
 // storage slot for the mapping
 #define constant HORSE_FED_TIMESTAMP_SLOT = FREE_STORAGE_POINTER()
 
+#define macro GET_HORSE_FED_TIMESTAMP() = takes(0) returns (0) {
+    0x04                        // [0x04]
+    calldataload                // [data[0x04]]
+    [HORSE_FED_TIMESTAMP_SLOT]  // [HORSE_FED_TIMESTAMP_SLOT, data[0x04]]
+    
+    // Loads an element to stack using 2 keys from stack
+    LOAD_ELEMENT_FROM_KEYS(0x00)// [horseFedTimestamp]
+
+    // Return the stack word
+    0x00                        // [0x00, horseFedTimestamp]
+    mstore                      // []
+    
+    // Takes 32-bytes from 0th position and return it
+    0x20 0x00 return
+}
+
 #define macro FEED_HORSE() = takes(0) returns(0) {
     timestamp                       // [timestamp]
     0x04                            // [0x04, timestamp]
@@ -40,7 +56,7 @@
     isHappyHorse:
         IS_HAPPY_HORSE()
     horseIdToFedTimeStamp:
-        HORSE_ID_TO_FED_TIMESTAMP()
+        GET_HORSE_FED_TIMESTAMP()
     horseHappyIfFedWithin:
         HORSE_HAPPY_IF_FED_WITHIN()
 }
