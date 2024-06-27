@@ -16,7 +16,7 @@
 #define constant TOTAL_SUPPLY_SLOT = FREE_STORAGE_POINTER()
 
 // 1 word value for 1 day
-#define constant HORSE_HAPPY_IF_FED_WITHIN_CONST = 0x15180
+#define constant HORSE_HAPPY_IF_FED_WITHIN_CONST = 0x0000000000000000000000000000000000000000000000000000000000015180
 
 #define macro CONTRUCTOR() = takes(0) returns(0) {
     ERC721_CONSTRUCTOR()
@@ -34,6 +34,7 @@
     add                 // [(0x01 + totalSupply)]
     [TOTAL_SUPPLY_SLOT] // [TOTAL_SUPPLY_SLOT, (0x01 + totalSupply)]
     sstore              // []
+    stop
 }
 
 #define macro FEED_HORSE() = takes(0) returns(0) {
