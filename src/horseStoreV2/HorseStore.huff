@@ -11,6 +11,48 @@
 // storage slot for the mapping
 #define constant HORSE_FED_TIMESTAMP_SLOT = FREE_STORAGE_POINTER()
 
+// 1 word value for 1 day
+#define constant HORSE_HAPPY_IF_FED_WITHIN_CONST = 0x15180
+
+#define macro FEED_HORSE() = takes(0) returns(0) {
+    timestamp                       // [timestamp]
+    0x04                            // [0x04, timestamp]
+    calldataload                    // [data[0x04], timestamp]
+    
+    // sstore the timestamp with the horseId key
+    [HORSE_FED_TIMESTAMP_SLOT]      // [HORSE_FED_TIMESTAMP_SLOT, data[0x04], timestamp]
+    
+    // Pass in 0x00 as the free memory pointer, which we don't worry about for now in this course
+    STORE_ELEMENT_FROM_KEYS(0x00)   // []
+}
+
+#define macro IS_HAPPY_HORSE() = takes(0) returns(0) {
+    0x04                                // [0x04]
+    calldataload                        // [horseId]
+    [HORSE_FED_TIMESTAMP_SLOT]          // [HORSE_FED_TIMESTAMP_SLOT, horseId]
+    LOAD_ELEMENT_FROM_KEYS(0x00)        // [horseFedTimestamp]
+    timestamp                           // [timestamp, horseFedTimestamp]
+    // dup2 x2 because we need to do both gt and eq op codes
+    dup2                                // [horseFedTimestamp, timestamp, horseFedTimestamp]
+    dup2                                // [timestamp, horseFedTimestamp, timestamp, horseFedTimestamp]
+    SUB                                 // [timestamp - horseFedTimestamp, timestamp, horseFedTimestamp]
+    [HORSE_HAPPY_IF_FED_WITHIN_CONST]   // [HORSE_HAPPY_IF_FED_WITHIN_CONST, timestamp - horseFedTimestamp, timestamp, horseFedTimestamp]
+    gt                                  // [horseFedWithin1Day?, timestamp, horseFedTimestamp]
+    start_return_true                   // [start_return_true, horseFedWithin1Day?, timestamp, horseFedTimestamp]
+    jumpi                               // [timestamp, horseFedTimestamp]
+    eq                                  // [(timestamp == horseFedTimestamp)]
+    start_return                        // [start_return, (timestamp == horseFedTimestamp)]
+    jump                                // [(timestamp == horseFedTimestamp)]
+
+    start_return_true:
+        0x01                            // [0x01, timestamp, horseFedTimestamp]
+    
+    start_return:
+        0x00                            // [0x00, 0x01, (timestamp == horseFedTimestamp)]
+        mstore                          // [(timestamp == horseFedTimestamp)]
+        0x20 0x00 return                // []
+}
+
 #define macro GET_HORSE_FED_TIMESTAMP() = takes(0) returns (0) {
     0x04                        // [0x04]
     calldataload                // [data[0x04]]
@@ -24,19 +66,7 @@
     mstore                      // []
     
     // Takes 32-bytes from 0th position and return it
-    0x20 0x00 return
-}
-
-#define macro FEED_HORSE() = takes(0) returns(0) {
-    timestamp                       // [timestamp]
-    0x04                            // [0x04, timestamp]
-    calldataload                    // [data[0x04], timestamp]
-    
-    // sstore the timestamp with the horseId key
-    [HORSE_FED_TIMESTAMP_SLOT]      // [HORSE_FED_TIMESTAMP_SLOT, data[0x04], timestamp]
-    
-    // Pass in 0x00 as the free memory pointer, which we don't worry about for now in this course
-    STORE_ELEMENT_FROM_KEYS(0x00)   // []
+    0x20 0x00 return            // [0x20 0x00 return]
 }
 
 #define macro MAIN() = takes(0) returns(0) {
